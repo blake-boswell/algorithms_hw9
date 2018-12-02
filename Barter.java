@@ -191,16 +191,36 @@ class Graph {
 
     }
 
-    // public ArrayList<Integer> DFSUtil(int vertex, ArrayList<Integer> sequence) {
+    public ArrayList<Integer> DFSUtil(int vertex, ArrayList<Integer> sequence, boolean alreadyVisited[]) {
+        if (sequence.contains(vertex)) {
+            // Cycle detected
+            double profit = getProfit(sequence);
+            if(profit > 1.0) {
+                // this.profit = profit
+                return sequence;
+            }
+        }
+        sequence.add(vertex);
+        alreadyVisited[vertex] = true;
+        Iterator<Integer> it = adjacencyList.get(vertex).iterator();
+        while (it.hasNext()) {
+            int next = it.next();
+            DFSUtil(next, sequence, alreadyVisited);
+        }
+        return new ArrayList<Integer>();
+    }
 
-    // }
-
-    // public void DFS() {
-    //     ArrayList<Integer> sequence = new ArrayList<>();
-    //     for (int i = 0; i < this.numVertices; i++) {
-    //         DFSUtil(i, sequence);
-    //     }
-    // }
+    public void DFS() {
+        ArrayList<Integer> sequence = new ArrayList<>();
+        boolean alreadyVisited[] = new boolean[this.numVertices + 1];
+        for (int i = 1; i < this.numVertices + 1; i++) {
+            alreadyVisited[i] = false;
+        }
+        for (int i = 1; i < this.numVertices + 1; i++) {
+            if (!alreadyVisited[i])
+                DFSUtil(i, sequence, alreadyVisited);
+        }
+    }
 }
 
 public class Barter {
