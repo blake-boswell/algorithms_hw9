@@ -106,9 +106,10 @@ class Graph {
             Iterator<Integer> it = adjacencyList.get(current).iterator();
             while (it.hasNext() && searching) {
                 int vertex = it.next();
-                System.out.println("\tNEXT: " + vertex);
+                System.out.println("\tCHECKING: " + current + " -> " + vertex);
                 // Detect the cycle
                 if (isBackEdge(vertex, stack)) {
+                    // Vertex already exists in the stack
                     int sequenceStart = stack.indexOf(vertex);
                     stack.push(vertex);
                     // Find if there is a profit
@@ -124,6 +125,7 @@ class Graph {
                         sequence.add(stack.get(i));
                         profit *= this.exchangeRates[stack.get(i)][stack.get(i + 1)];
                     }
+                    sequence.add(stack.get(stack.size() - 1));
 
                     System.out.println("Sequence:");
                     for (int i = 0; i < sequence.size(); i++) {
@@ -139,7 +141,7 @@ class Graph {
                     stack.pop();
                 }
                 if (!hasBeenVisited(vertex, alreadyVisited, stack)) {
-                    System.out.println("\tBeen Visited?: " + hasBeenVisited(vertex, alreadyVisited, stack));
+                    System.out.println("\tFirst visit for " + vertex);
                     searching = false;
                     stack.push(vertex);
                 }
@@ -188,6 +190,17 @@ class Graph {
         
 
     }
+
+    // public ArrayList<Integer> DFSUtil(int vertex, ArrayList<Integer> sequence) {
+
+    // }
+
+    // public void DFS() {
+    //     ArrayList<Integer> sequence = new ArrayList<>();
+    //     for (int i = 0; i < this.numVertices; i++) {
+    //         DFSUtil(i, sequence);
+    //     }
+    // }
 }
 
 public class Barter {
