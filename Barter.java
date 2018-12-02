@@ -12,11 +12,13 @@ import java.io.PrintWriter;
 class Graph {
     public int numVertices;
     public Map<Double, String> rateMap;
+    public String exchange[][];
     public double exchangeRates[][];
     public List< List<Integer> > adjacencyList;
     public Graph(int numVertices) {
         this.numVertices = numVertices;
         this.rateMap = new HashMap<Double, String>();
+        this.exchange = new String[numVertices + 1][numVertices + 1];
         this.exchangeRates = new double[numVertices + 1][numVertices + 1];
         for (int i = 0; i <= numVertices; i++) {
             for (int j = 0; j <= numVertices; j++) {
@@ -172,8 +174,8 @@ class Graph {
                 }
                 int from = sequence.get(sequence.size() - 1);
                 int to = sequence.get(0);
-                writer.println(from + " " + to + " " + this.rateMap.get(this.exchangeRates[from][to]));
-                writer.println("one kg of " + sequence.get(0) + " gets " + profit + " kg of " + sequence.get(0) + " from the above sequence.");
+                writer.println(from + " " + to + " " + this.exchange[from][to]);
+                writer.println("one kg of product " + sequence.get(0) + " gets " + profit + " kg of product " + sequence.get(0) + " from the above sequence.");
             } else {
                 writer.println("no");
             }
@@ -223,6 +225,8 @@ public class Barter {
 
             // Set up edges for result
             graph.rateMap.put(exchangeRate, (Double.toString(fromWeight) + " " + Double.toString(toWeight)));
+            graph.exchange[from][to] = Double.toString(fromWeight) + " " + Double.toString(toWeight);
+            graph.exchange[to][from] = Double.toString(toWeight) + " " + Double.toString(fromWeight);
         }
 
         in.close();
