@@ -191,12 +191,25 @@ class Graph {
 
     }
 
-    public ArrayList<Integer> DFSUtil(int vertex, ArrayList<Integer> sequence, boolean alreadyVisited[]) {
+    public double getProfit(ArrayList<Integer> sequence) {
+        double profit = 1.0;
+        for (int i = 0; i < sequence.size() - 1; i++) {
+            profit *= this.exchangeRates[sequence.get(i)][sequence.get(i + 1)];
+        }
+        return profit;
+    }
+
+    public ArrayList<Integer> DFSUtil(int vertex, ArrayList<Integer> sequence, boolean alreadyVisited[], String outPath) {
+        System.out.println("Call with " + vertex);
+        for (int i = 0; i < sequence.size(); i++) {
+            System.out.print(sequence.get(i) + " ");
+        }
+        System.out.println();
         if (sequence.contains(vertex)) {
             // Cycle detected
             double profit = getProfit(sequence);
             if(profit > 1.0) {
-                // this.profit = profit
+                writeResult(sequence, profit, outPath);
                 return sequence;
             }
         }
@@ -205,12 +218,12 @@ class Graph {
         Iterator<Integer> it = adjacencyList.get(vertex).iterator();
         while (it.hasNext()) {
             int next = it.next();
-            DFSUtil(next, sequence, alreadyVisited);
+            DFSUtil(next, sequence, alreadyVisited, outPath);
         }
         return new ArrayList<Integer>();
     }
 
-    public void DFS() {
+    public void DFS(String outPath) {
         ArrayList<Integer> sequence = new ArrayList<>();
         boolean alreadyVisited[] = new boolean[this.numVertices + 1];
         for (int i = 1; i < this.numVertices + 1; i++) {
@@ -218,7 +231,7 @@ class Graph {
         }
         for (int i = 1; i < this.numVertices + 1; i++) {
             if (!alreadyVisited[i])
-                DFSUtil(i, sequence, alreadyVisited);
+                DFSUtil(i, sequence, alreadyVisited, outPath);
         }
     }
 }
@@ -265,6 +278,7 @@ public class Barter {
         in.close();
 
         graph.print();
-        graph.findInefficiency(outPath);
+        // graph.findInefficiency(outPath);
+        graph.DFS(outPath);
     }
 }
