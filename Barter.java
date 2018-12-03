@@ -46,123 +46,11 @@ class Graph {
     }
 
     /**
-     * Finds if there is an inefficiency in our goods exchange graph
-     * Inefficiency: When you can trade product A for more of product A, making a profit
-     * EX: .5 kg of rice for .75 kg of rice by trading rice for corn for wheat for rice
-     * 
-     * Running the function results in output written to the out file
-     * 
-     * DFS that can terminate early if cycle is found
-     * O(V + E)
-     * 
-     * @param outPath
-     */
-    public void findInefficiency(String outPath) {
-        // Perform DFS to look for a cycle
-        boolean alreadyVisited[] = new boolean[this.numVertices + 1];
-        for (int i = 0; i < this.numVertices + 1; i++) {
-            alreadyVisited[i] = false;
-        }
-
-        Stack<Integer> stack = new Stack<Integer>();
-        for (int i = 1; i < this.numVertices + 1; i++) {
-            if (alreadyVisited[i] == false) {
-                stack.push(i);
-                boolean isInefficient = findCycle(stack, alreadyVisited, outPath);
-                if (isInefficient) {
-                    // Terminate early
-                    return;
-                }
-            }
-        }
-        ArrayList<Integer> emptyList = new ArrayList<>();
-        double profit = 0.0;
-        this.writeResult(emptyList, profit, outPath);
-
-        // If a cycle is found, check if the sequence produces a profit
-    }
-
-    public boolean hasBeenVisited(int vertex, boolean alreadyVisited[], Stack<Integer> stack) {
-        return (alreadyVisited[vertex] == true || stack.contains(vertex) == true);
-    }
-
-    public boolean isBackEdge(int vertex, Stack<Integer> stack) {
-        return stack.contains(vertex);
-    }
-
-    /**
-     * Finds a cycle in the graph && tests if it is inefficient
-     * If inefficient it will write the output
-     * 
-     * @param stack
-     * @param alreadyVisited
-     * @param outPath
-     * @return
-     */
-    public boolean findCycle(Stack<Integer> stack, boolean alreadyVisited[], String outPath) {
-        while (!stack.isEmpty()) {
-            boolean searching = true;
-            int current = stack.peek();
-            Iterator<Integer> it = adjacencyList.get(current).iterator();
-            while (it.hasNext() && searching) {
-                int vertex = it.next();
-                System.out.println("\tCHECKING: " + current + " -> " + vertex);
-                // Detect the cycle
-                if (isBackEdge(vertex, stack)) {
-                    // Vertex already exists in the stack
-                    int sequenceStart = stack.indexOf(vertex);
-                    stack.push(vertex);
-                    // Find if there is a profit
-                    System.out.println("Checking for profit...");
-                    for (int i = stack.size() - 1; i >= 0; i--) {
-                        System.out.println(stack.get(i));
-                    }
-
-                    ArrayList<Integer> sequence = new ArrayList<>();
-                    double profit = 1.0;
-
-                    for (int i = sequenceStart; i < stack.size() - 1; i++) {
-                        sequence.add(stack.get(i));
-                        profit *= this.exchangeRates[stack.get(i)][stack.get(i + 1)];
-                    }
-                    sequence.add(stack.get(stack.size() - 1));
-
-                    System.out.println("Sequence:");
-                    for (int i = 0; i < sequence.size(); i++) {
-                        System.out.print(sequence.get(i) + " ");
-                    }
-                    System.out.println();
-                    
-                    System.out.println("Profit: " + profit);
-                    if (profit > 1.0) {
-                        this.writeResult(sequence, profit, outPath);
-                        return true;
-                    }
-                    stack.pop();
-                }
-                if (!hasBeenVisited(vertex, alreadyVisited, stack)) {
-                    System.out.println("\tFirst visit for " + vertex);
-                    searching = false;
-                    stack.push(vertex);
-                }
-            }
-            if (searching) {
-                int vertex = stack.pop();
-                alreadyVisited[vertex] = true;
-            }
-            for (int i = stack.size() - 1; i >= 0; i--) {
-                System.out.println(stack.get(i));
-            }
-        }
-        return false;
-    }
-
-    /**
      * Converts the sequence and profit into a formatted output to be written to the file in the path of outPath
      * 
-     * @param sequence
-     * @param profit
-     * @param outPath
+     * @param sequence : sequence taken
+     * @param profit : profit of sequence
+     * @param outPath : output file path
      */
     public void writeResult(ArrayList<Integer> sequence, double profit, String outPath) {
         try {
@@ -174,9 +62,9 @@ class Graph {
                     int to = sequence.get(i + 1);
                     writer.println(from + " " + to + " " + this.rateMap.get(this.exchangeRates[from][to]));
                 }
-                int from = sequence.get(sequence.size() - 1);
-                int to = sequence.get(0);
-                writer.println(from + " " + to + " " + this.exchange[from][to]);
+                // int from = sequence.get(sequence.size() - 1);
+                // int to = sequence.get(0);
+                // writer.println(from + " " + to + " " + this.exchange[from][to]);
                 writer.println("one kg of product " + sequence.get(0) + " gets " + profit + " kg of product " + sequence.get(0) + " from the above sequence.");
             } else {
                 writer.println("no");
@@ -186,11 +74,14 @@ class Graph {
         } catch (IOException err) {
             err.printStackTrace();
         }
-        
-        
-
     }
 
+    /**
+     * Returns the profit from a given sequence
+     * 
+     * @param sequence : sequence taken
+     * @return profit of sequence
+     */
     public double getProfit(ArrayList<Integer> sequence) {
         double profit = 1.0;
         for (int i = 0; i < sequence.size() - 1; i++) {
@@ -199,39 +90,96 @@ class Graph {
         return profit;
     }
 
-    public ArrayList<Integer> DFSUtil(int vertex, ArrayList<Integer> sequence, boolean alreadyVisited[], String outPath) {
-        System.out.println("Call with " + vertex);
+    /**
+     * Debugging function for printing the contents of the sequence
+     * 
+     * @param sequence : sequence taken
+     */
+    public void printSequence(ArrayList<Integer> sequence) {
         for (int i = 0; i < sequence.size(); i++) {
             System.out.print(sequence.get(i) + " ");
         }
         System.out.println();
-        if (sequence.contains(vertex)) {
-            // Cycle detected
-            double profit = getProfit(sequence);
-            if(profit > 1.0) {
-                writeResult(sequence, profit, outPath);
-                return sequence;
-            }
-        }
-        sequence.add(vertex);
-        alreadyVisited[vertex] = true;
-        Iterator<Integer> it = adjacencyList.get(vertex).iterator();
-        while (it.hasNext()) {
-            int next = it.next();
-            DFSUtil(next, sequence, alreadyVisited, outPath);
-        }
-        return new ArrayList<Integer>();
     }
 
-    public void DFS(String outPath) {
+    /**
+     * Recursive function for finding an inefficiency in a trade model
+     * 
+     * 1. Explore a new vertex
+     * 2. Does the new vertex make a cycle?
+     *      yes -> does the cycle make a profit?
+     *          yes -> stop searching & write result
+     *          no -> return
+     *      no -> explore a new adjacent vertex
+     * 
+     * @param vertex : new vertex to explore
+     * @param sequence : sequence taken
+     * @param alreadyVisited : keeps track of all vertices visited (for detached graphs)
+     * @param outPath : output file path
+     * @return if inefficientCycle was found
+     */
+    public boolean findInefficientCycle(int vertex, ArrayList<Integer> sequence, boolean alreadyVisited[], String outPath) {
+        // DEBUG
+        System.out.println("Call with " + vertex);
+        printSequence(sequence);
+
+        // Stop if vertex is in the sequence
+        alreadyVisited[vertex] = true;
+        if (sequence.contains(vertex)) {
+            sequence.add(vertex);
+            System.out.print("\tCylce found: \n\t");
+            printSequence(sequence);
+            double profit = getProfit(sequence);
+            System.out.println("\tProfit: " + profit);
+            if (profit > 1.0) {
+                writeResult(sequence, profit, outPath);
+                return true;
+            }
+            sequence.remove(sequence.size() - 1);
+            return false;
+        }
+
+        sequence.add(vertex);
+
+        // for each adjacent vertice, findInefficientCycle
+        Iterator<Integer> it = adjacencyList.get(vertex).iterator();
+        boolean done = false;
+        while (it.hasNext() && !done) {
+            int next = it.next();
+            done = findInefficientCycle(next, sequence, alreadyVisited, outPath);
+        }
+        sequence.remove(sequence.size() - 1);
+        
+        return done;
+    }
+
+    /**
+     * Initializer for recursive findInefficientCycle
+     * 
+     * @param outPath : output file path
+     */
+    public void findInefficiency(String outPath) {
         ArrayList<Integer> sequence = new ArrayList<>();
         boolean alreadyVisited[] = new boolean[this.numVertices + 1];
         for (int i = 1; i < this.numVertices + 1; i++) {
             alreadyVisited[i] = false;
         }
+
+        boolean cycleFound = false;
+
         for (int i = 1; i < this.numVertices + 1; i++) {
-            if (!alreadyVisited[i])
-                DFSUtil(i, sequence, alreadyVisited, outPath);
+            if (!alreadyVisited[i]) {
+                cycleFound = findInefficientCycle(i, sequence, alreadyVisited, outPath);
+                if (cycleFound) {
+                    break;
+                }
+            }
+                
+        }
+        System.out.println("profit: " + cycleFound);
+
+        if (!cycleFound) {
+            writeResult(sequence, 0, outPath);
         }
     }
 }
@@ -278,7 +226,6 @@ public class Barter {
         in.close();
 
         graph.print();
-        // graph.findInefficiency(outPath);
-        graph.DFS(outPath);
+        graph.findInefficiency(outPath);
     }
 }
