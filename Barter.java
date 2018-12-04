@@ -125,6 +125,8 @@ class Graph {
      *          no -> return
      *      no -> explore a new adjacent vertex
      * 
+     * O(V!) if no profit exist within a strongly connected graph ... :(
+     * 
      * @param vertex : new vertex to explore
      * @param sequence : sequence taken
      * @param alreadyVisited : keeps track of all vertices visited (for detached graphs)
@@ -169,6 +171,8 @@ class Graph {
 
     /**
      * Initializer for recursive findInefficientCycle
+     * 
+     * O(V) + O(findInefficientCycle) = O(V!)
      * 
      * @param outPath : output file path
      */
