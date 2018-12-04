@@ -7,7 +7,7 @@ import java.io.PrintWriter;
  * numVertices: stores the number of vertices in the graph
  * rateMap: stores the map from exchange rate (weight2 / weight1) to weight1 weight2 for outputting results
  * exchangeRates: stores the exchange rate from vertex a to b as exchangeRate[a][b] (weightB / weightA)
- * adjacencyList: Representation of directed edges. Used for DFS in search of a cylce using back edge detection
+ * adjacencyList: Representation of directed edges. Used for DFS in search of a cycle using back edge detection
  */
 class Graph {
     public int numVertices;
@@ -52,12 +52,12 @@ class Graph {
      * @param profit : profit of sequence
      * @param outPath : output file path
      */
-    public void writeResult(ArrayList<Integer> sequence, double profit, String outPath) {
+    public void writeResult(ArrayList<Integer> sequence, int cycleStart, double profit, String outPath) {
         try {
             PrintWriter writer = new PrintWriter(outPath, "UTF-8");
             if (sequence.size() > 0) {
                 writer.println("yes");
-                for (int i = 0; i < sequence.size() - 1; i++) {
+                for (int i = cycleStart; i < sequence.size() - 1; i++) {
                     int from = sequence.get(i);
                     int to = sequence.get(i + 1);
                     writer.println(from + " " + to + " " + this.rateMap.get(this.exchangeRates[from][to]));
@@ -65,7 +65,7 @@ class Graph {
                 // int from = sequence.get(sequence.size() - 1);
                 // int to = sequence.get(0);
                 // writer.println(from + " " + to + " " + this.exchange[from][to]);
-                writer.println("one kg of product " + sequence.get(0) + " gets " + profit + " kg of product " + sequence.get(0) + " from the above sequence.");
+                writer.println("one kg of product " + sequence.get(cycleStart) + " gets " + profit + " kg of product " + sequence.get(cycleStart) + " from the above sequence.");
             } else {
                 writer.println("no");
             }
@@ -82,9 +82,9 @@ class Graph {
      * @param sequence : sequence taken
      * @return profit of sequence
      */
-    public double getProfit(ArrayList<Integer> sequence) {
+    public double getProfit(ArrayList<Integer> sequence, int cycleStart) {
         double profit = 1.0;
-        for (int i = 0; i < sequence.size() - 1; i++) {
+        for (int i = cycleStart; i < sequence.size() - 1; i++) {
             profit *= this.exchangeRates[sequence.get(i)][sequence.get(i + 1)];
         }
         return profit;
@@ -101,6 +101,19 @@ class Graph {
         }
         System.out.println();
     }
+
+    /**
+     * Debugging function for printing the contents of the cycle
+     * 
+     * @param sequence : sequence taken
+     */
+    public void printCycle(ArrayList<Integer> sequence, int cycleStart) {
+        for (int i = cycleStart; i < sequence.size(); i++) {
+            System.out.print(sequence.get(i) + " ");
+        }
+        System.out.println();
+    }
+
 
     /**
      * Recursive function for finding an inefficiency in a trade model
@@ -126,13 +139,14 @@ class Graph {
         // Stop if vertex is in the sequence
         alreadyVisited[vertex] = true;
         if (sequence.contains(vertex)) {
+            int cycleStart = sequence.indexOf(vertex);
             sequence.add(vertex);
-            System.out.print("\tCylce found: \n\t");
-            printSequence(sequence);
-            double profit = getProfit(sequence);
+            System.out.print("\tCycle found: \n\t");
+            printCycle(sequence, cycleStart);
+            double profit = getProfit(sequence, cycleStart);
             System.out.println("\tProfit: " + profit);
             if (profit > 1.0) {
-                writeResult(sequence, profit, outPath);
+                writeResult(sequence, cycleStart, profit, outPath);
                 return true;
             }
             sequence.remove(sequence.size() - 1);
@@ -179,7 +193,7 @@ class Graph {
         System.out.println("profit: " + cycleFound);
 
         if (!cycleFound) {
-            writeResult(sequence, 0, outPath);
+            writeResult(sequence, 0, 0, outPath);
         }
     }
 }
