@@ -11,13 +11,11 @@ import java.io.PrintWriter;
  */
 class Graph {
     public int numVertices;
-    public Map<Double, String> rateMap;
     public String exchange[][];
     public double exchangeRates[][];
     public List< List<Integer> > adjacencyList;
     public Graph(int numVertices) {
         this.numVertices = numVertices;
-        this.rateMap = new HashMap<Double, String>();
         this.exchange = new String[numVertices + 1][numVertices + 1];
         this.exchangeRates = new double[numVertices + 1][numVertices + 1];
         for (int i = 0; i <= numVertices; i++) {
@@ -60,7 +58,7 @@ class Graph {
                 for (int i = cycleStart; i < sequence.size() - 1; i++) {
                     int from = sequence.get(i);
                     int to = sequence.get(i + 1);
-                    writer.println(from + " " + to + " " + this.rateMap.get(this.exchangeRates[from][to]));
+                    writer.println(from + " " + to + " " + this.exchange[from][to]);
                 }
                 // int from = sequence.get(sequence.size() - 1);
                 // int to = sequence.get(0);
@@ -135,18 +133,18 @@ class Graph {
      */
     public boolean findInefficientCycle(int vertex, ArrayList<Integer> sequence, boolean alreadyVisited[], String outPath) {
         // DEBUG
-        System.out.println("Call with " + vertex);
-        printSequence(sequence);
+        // System.out.println("Call with " + vertex);
+        // printSequence(sequence);
 
         // Stop if vertex is in the sequence
         alreadyVisited[vertex] = true;
         if (sequence.contains(vertex)) {
             int cycleStart = sequence.indexOf(vertex);
             sequence.add(vertex);
-            System.out.print("\tCycle found: \n\t");
-            printCycle(sequence, cycleStart);
+            // System.out.print("\tCycle found: \n\t");
+            // printCycle(sequence, cycleStart);
             double profit = getProfit(sequence, cycleStart);
-            System.out.println("\tProfit: " + profit);
+            // System.out.println("\tProfit: " + profit);
             if (profit > 1.0) {
                 writeResult(sequence, cycleStart, profit, outPath);
                 return true;
@@ -194,7 +192,7 @@ class Graph {
             }
                 
         }
-        System.out.println("profit: " + cycleFound);
+        // System.out.println("profit: " + cycleFound);
 
         if (!cycleFound) {
             writeResult(sequence, 0, 0, outPath);
@@ -206,7 +204,7 @@ public class Barter {
     public static void main(String[] args) throws Exception {
         String inPath = "input.txt";
         String outPath = "output.txt";
-        System.out.println(args.length);
+        // System.out.println(args.length);
         if (args.length > 0) {
             inPath = args[0];
         }
@@ -217,7 +215,7 @@ public class Barter {
         Scanner in = new Scanner(file);
 
         int numVertices = in.nextInt();
-        System.out.println("Read in numVertices: " + numVertices);
+        // System.out.println("Read in numVertices: " + numVertices);
         Graph graph = new Graph(numVertices);
         while (in.hasNextLine()) {
 
@@ -225,7 +223,7 @@ public class Barter {
             int from, to;
             from = in.nextInt();
             to = in.nextInt();
-            System.out.println("Read in from & to: " + from + ", " + to);
+            // System.out.println("Read in from & to: " + from + ", " + to);
             graph.adjacencyList.get(from).add(to);
 
             // Set up edge weights
@@ -236,14 +234,12 @@ public class Barter {
             graph.exchangeRates[from][to] = exchangeRate;
 
             // Set up edges for result
-            graph.rateMap.put(exchangeRate, (Double.toString(fromWeight) + " " + Double.toString(toWeight)));
             graph.exchange[from][to] = Double.toString(fromWeight) + " " + Double.toString(toWeight);
-            graph.exchange[to][from] = Double.toString(toWeight) + " " + Double.toString(fromWeight);
         }
 
         in.close();
 
-        graph.print();
         graph.findInefficiency(outPath);
+        System.out.println("Output written to " + outPath);
     }
 }
