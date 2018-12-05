@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 
 /**
  * numVertices: stores the number of vertices in the graph
- * rateMap: stores the map from exchange rate (weight2 / weight1) to weight1 weight2 for outputting results
+ * exchange: allows access to original weights, weightU weightV, from vertices u and v for outputting results
  * exchangeRates: stores the exchange rate from vertex a to b as exchangeRate[a][b] (weightB / weightA)
  * adjacencyList: Representation of directed edges. Used for DFS in search of a cycle using back edge detection
  */
@@ -82,9 +82,12 @@ class Graph {
      */
     public double getProfit(ArrayList<Integer> sequence, int cycleStart) {
         double profit = 1.0;
-        for (int i = cycleStart; i < sequence.size() - 1; i++) {
-            profit *= this.exchangeRates[sequence.get(i)][sequence.get(i + 1)];
+        if (cycleStart >= 0) {
+            for (int i = cycleStart; i < sequence.size() - 1; i++) {
+                profit *= this.exchangeRates[sequence.get(i)][sequence.get(i + 1)];
+            }
         }
+        
         return profit;
     }
 
